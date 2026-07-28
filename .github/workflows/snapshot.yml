@@ -1,0 +1,37 @@
+name: Commodity Snapshot Job
+
+on:
+  repository_dispatch:
+    types: [run-snapshot]
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas yfinance discord.py python-dotenv
+
+      - name: Run Snapshot Task
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+          SYSTEM_LOG_WEBHOOK_URL: ${{ secrets.SYSTEM_LOG_WEBHOOK_URL }}
+        run: python src/main.py --mode snapshot
+
+      - name: Commit and Push State
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Chore: Update snapshot state [skip ci]" && git push)
