@@ -1,11 +1,15 @@
 import os
 import sys
+
+# プロジェクトルート（srcの親ディレクトリ）をPythonパスに追加
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# --- ここから下のインポートを行う ---
 from discord import SyncWebhook, Embed
 from src.config import REPORT_WEBHOOK_URL, ALERT_WEBHOOK_URL
 from src.modules.oanda_client import fetch_oanda_candles, fetch_usdjpy_rate
 
 def send_webhook(webhook_url: str, embed: Embed):
-    """Webhookに埋め込みメッセージを送信する共通関数"""
     if not webhook_url:
         print("Webhook URLが設定されていないためスキップします。")
         return
@@ -17,7 +21,6 @@ def send_webhook(webhook_url: str, embed: Embed):
         print(f"Webhook 送信エラー: {e}")
 
 def run_task():
-    # データを取得（yfinanceベース）
     df_m15 = fetch_oanda_candles("WTIC_USD", 20, "M15")
     df_h1 = fetch_oanda_candles("WTIC_USD", 50, "H1")
     usdjpy = fetch_usdjpy_rate()
@@ -28,9 +31,7 @@ def run_task():
 
     latest_h1 = df_h1.iloc[-1]
     
-    # -----------------------------------------------
-    # 1. 定期レポート送信 (REPORT_WEBHOOK_URL)
-    # -----------------------------------------------
+    # 1. 定期レポート送信
     sma20 = float(latest_h1.get("SMA20", 0))
     sma50 = float(latest_h1.get("SMA50", 0))
     trend = "📈 上昇トレンド" if sma20 > sma50 else "📉 下降トレンド"
@@ -45,9 +46,7 @@ def run_task():
 
     send_webhook(REPORT_WEBHOOK_URL, report_embed)
 
-    # -----------------------------------------------
-    # 2. 急変チェック・アラート送信 (ALERT_WEBHOOK_URL)
-    # -----------------------------------------------
+    # 2. 急変チェック・アラート送信
     if not df_m15.empty and len(df_m15) >= 2:
         latest_m15 = df_m15.iloc[-1]
         prev_m15 = df_m15.iloc[-2]
@@ -55,9 +54,8 @@ def run_task():
         price_change = float(latest_m15["Close"] - prev_m15["Close"])
         pct_change = (price_change / prev_m15["Close"]) * 100
 
-        # 15分で1%以上の急変動があればアラート送信
         if abs(pct_change) >= 1.0:
-            direction = "🚀 急騰" if pct_change > 0 else "📉 急落"
+            direction = "🚀 急騰" if pct_change > 0 else "📉 下落"
             alert_embed = Embed(
                 title=f"🚨 コモディティ価格急変アラート ({direction})",
                 color=0xe74c3c if pct_change < 0 else 0x2ecc71
