@@ -4,5 +4,5 @@ pandas
 numpy
 matplotlib
 mplfinance
-yfinance
+yfinance>=0.2.40
 python-dotenv
