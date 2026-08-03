@@ -25,6 +25,7 @@ jobs:
 
       - name: Run Snapshot Task
         env:
+          TZ: 'Asia/Tokyo'
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
           SYSTEM_LOG_WEBHOOK_URL: ${{ secrets.SYSTEM_LOG_WEBHOOK_URL }}
         run: python src/main.py --mode snapshot
