@@ -28,7 +28,9 @@ jobs:
           TZ: 'Asia/Tokyo'
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
           SYSTEM_LOG_WEBHOOK_URL: ${{ secrets.SYSTEM_LOG_WEBHOOK_URL }}
-        run: python src/main.py --mode snapshot
+          REPORT_WEBHOOK_URL: ${{ secrets.REPORT_WEBHOOK_URL }}
+          RANKING_WEBHOOK_URL: ${{ secrets.RANKING_WEBHOOK_URL }}
+        run: PYTHONPATH=. python src/main.py --mode snapshot
 
       - name: Commit and Push State
         run: |
