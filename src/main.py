@@ -8,11 +8,11 @@ import yfinance as yf
 # 1. 明示的に日本時間（JST）のタイムゾーンを定義
 JST = zoneinfo.ZoneInfo("Asia/Tokyo")
 
-# 監視対象のティッカーリスト（アルミ ALI=F を追加）
+# 監視対象のティッカーリスト（16銘柄）
 TICKERS = [
     # エネルギー
     "CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
-    # 貴金属・非鉄金属（アルミ ALI=F、銅 HG=F を含む）
+    # 貴金属・非鉄金属
     "GC=F", "SI=F", "HG=F", "PL=F", "PA=F", "ALI=F",
     # ソフトコモディティ・農産物 (CBOTコード)
     "KC=F", "SB=F", "ZC=F", "ZW=F", "ZS=F"
@@ -23,7 +23,7 @@ STATE_FILE_PATH = "data/state.json"
 def get_commodity_data():
     """
     yfinanceからデータを取得する関数
-    period='5d' で直近データを確保し、取得失敗率を低減
+    銘柄ごとに最新の有効価格（NaNでないデータ）を確実に取得する
     """
     try:
         df = yf.download(TICKERS, period="5d", interval="1m", progress=False)
@@ -31,13 +31,21 @@ def get_commodity_data():
             print("[WARN] データが取得できませんでした。")
             return {}
         
-        # 最新の終値（Close）を取得
+        close_df = df["Close"]
         latest_prices = {}
-        close_df = df["Close"].iloc[-1]
         
         for ticker in TICKERS:
-            if ticker in close_df and not pd.isna(close_df[ticker]):
-                latest_prices[ticker] = float(close_df[ticker])
+            # MultiIndex構造かどうかの判定と取得
+            if isinstance(close_df.columns, pd.MultiIndex):
+                ticker_series = close_df.xs(ticker, level=1, axis=1) if ticker in close_df.columns.levels[1] else None
+            else:
+                ticker_series = close_df[ticker] if ticker in close_df.columns else None
+
+            if ticker_series is not None:
+                # NaNを除外した上で一番最後の有効データ（最新価格）を取得
+                valid_series = ticker_series.dropna()
+                if not valid_series.empty:
+                    latest_prices[ticker] = float(valid_series.iloc[-1])
                 
         return latest_prices
     except Exception as e:
