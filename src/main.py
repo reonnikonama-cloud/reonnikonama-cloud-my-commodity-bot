@@ -7,6 +7,7 @@ from src.config import (
     JST,
     RANKING_WEBHOOK_URL,
     REPORT_WEBHOOK_URL,
+    SYSTEM_LOG_WEBHOOK_URL,
     STATE_FILE_PATH,
 )
 from src.discord import send_discord_message
@@ -77,9 +78,14 @@ def run_snapshot():
 
     save_state(state)
 
+    # 15分ごとのスナップショット保存完了ログを送信
+    count = len(prices)
+    log_msg = f"✅ `[{date_str} {time_str}]` スナップショット保存完了 (円換算済み / 取得数: {count}/16)"
+    send_discord_message(SYSTEM_LOG_WEBHOOK_URL, log_msg)
+
 
 def run_daily_report():
-    """デイリーレポート送信ジョブ（時間帯に関わらず強制送信）"""
+    """デイリーレポート送信ジョブ"""
     prices, usdjpy = get_commodity_data()
     state = load_state()
     if not state.get("snapshots") and prices:
@@ -95,7 +101,7 @@ def run_daily_report():
 
 
 def run_ranking():
-    """ランキング送信ジョブ（時間帯に関わらず強制送信）"""
+    """ランキング送信ジョブ"""
     state = load_state()
     vol_ranking = generate_volatility_time_ranking(state, "日次サマリー")
     send_discord_message(RANKING_WEBHOOK_URL, vol_ranking)
