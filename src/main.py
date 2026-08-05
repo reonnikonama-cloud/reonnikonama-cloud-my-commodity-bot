@@ -2,10 +2,10 @@ import os
 import json
 from datetime import datetime
 
-from .config import JST, REPORT_WEBHOOK_URL, RANKING_WEBHOOK_URL, STATE_FILE_PATH
-from .discord import send_discord_message
-from .fetcher import get_commodity_data
-from .reporters import generate_am_report, generate_pm_report, generate_volatility_time_ranking
+from src.config import JST, REPORT_WEBHOOK_URL, RANKING_WEBHOOK_URL, STATE_FILE_PATH
+from src.discord import send_discord_message
+from src.modules.fetcher import get_commodity_data
+from src.reporters import generate_am_report, generate_pm_report, generate_volatility_time_ranking
 
 def run_snapshot():
     now_jst = datetime.now(JST)
