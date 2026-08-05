@@ -1,4 +1,4 @@
-from .config import TICKERS
+from src.config import TICKERS
 
 def generate_am_report(state: dict, usdjpy: float) -> str:
     """AM前場サマリー生成"""
