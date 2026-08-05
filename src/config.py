@@ -1,46 +1,22 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv
+import zoneinfo
 
-# プロジェクトルートの .env ファイルを自動読み込み
-load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+# 日本時間（JST）
+JST = zoneinfo.ZoneInfo("Asia/Tokyo")
 
-# ------------------------------------------------------------------
-# 1. Webhook URL 設定 (前後空白・引用符の自動ストリップ処理付き)
-# ------------------------------------------------------------------
-REPORT_WEBHOOK_URL = os.getenv("REPORT_WEBHOOK_URL", "").strip().strip("'").strip('"')
-ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "").strip().strip("'").strip('"')
+# 環境変数（GitHub Secrets）
+SYSTEM_LOG_WEBHOOK_URL = os.getenv("SYSTEM_LOG_WEBHOOK_URL", "")
+REPORT_WEBHOOK_URL = os.getenv("REPORT_WEBHOOK_URL", "")
+RANKING_WEBHOOK_URL = os.getenv("RANKING_WEBHOOK_URL", "")
 
-# RANKING_WEBHOOK_URL が未設定の場合は REPORT_WEBHOOK_URL を自動フォールバック
-_ranking_url = os.getenv("RANKING_WEBHOOK_URL", "").strip().strip("'").strip('"')
-RANKING_WEBHOOK_URL = _ranking_url if _ranking_url else REPORT_WEBHOOK_URL
-
-# SYSTEM_LOG_WEBHOOK_URL (管理者ログ用)
-SYSTEM_LOG_WEBHOOK_URL = os.getenv("SYSTEM_LOG_WEBHOOK_URL", "").strip().strip("'").strip('"')
-
-
-# ------------------------------------------------------------------
-# 2. 監視対象コモディティ 15銘柄 (yfinance Symbol : 表示用名称)
-# ------------------------------------------------------------------
-COMMODITY_TARGETS = {
+TICKERS = [
     # エネルギー
-    "CL=F": "WTI原油",
-    "BZ=F": "ブレント原油",
-    "NG=F": "天然ガス",
-    "HO=F": "暖房油",
-    "RB=F": "RBOBガソリン",
-    
-    # 貴金属・産業用金属
-    "GC=F": "金 (Gold)",
-    "SI=F": "銀 (Silver)",
-    "HG=F": "銅 (Copper)",
-    "PL=F": "プラチナ",
-    "PA=F": "パラジウム",
-    
-    # 農産物
-    "C=F": "トウモロコシ",
-    "W=F": "小麦",
-    "S=F": "大豆",
-    "KC=F": "コーヒー",
-    "SB=F": "砂糖"
-}
+    "CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
+    # 貴金属・非鉄金属
+    "GC=F", "SI=F", "HG=F", "PL=F", "PA=F", "ALI=F",
+    # ソフトコモディティ・農産物 (CBOTコード)
+    "KC=F", "SB=F", "ZC=F", "ZW=F", "ZS=F"
+]
+
+CENT_BASED_TICKERS = {"KC=F", "SB=F", "ZC=F", "ZW=F", "ZS=F"}
+STATE_FILE_PATH = "data/state.json"
