@@ -8,14 +8,14 @@ import yfinance as yf
 # 1. 明示的に日本時間（JST）のタイムゾーンを定義
 JST = zoneinfo.ZoneInfo("Asia/Tokyo")
 
-# 監視対象のティッカーリスト（農産物をCBOT電子取引コード ZC=F, ZW=F, ZS=F に変更）
+# 監視対象のティッカーリスト（アルミ ALI=F を追加）
 TICKERS = [
+    # エネルギー
     "CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
-    "GC=F", "SI=F", "HG=F", "PL=F", "PA=F",
-    "KC=F", "SB=F", 
-    "ZC=F",  # トウモロコシ (CBOT: Corn)
-    "ZW=F",  # 小麦 (CBOT: Wheat)
-    "ZS=F"   # 大豆 (CBOT: Soybeans)
+    # 貴金属・非鉄金属（アルミ ALI=F、銅 HG=F を含む）
+    "GC=F", "SI=F", "HG=F", "PL=F", "PA=F", "ALI=F",
+    # ソフトコモディティ・農産物 (CBOTコード)
+    "KC=F", "SB=F", "ZC=F", "ZW=F", "ZS=F"
 ]
 
 STATE_FILE_PATH = "data/state.json"
