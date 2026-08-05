@@ -1,7 +1,7 @@
 import pandas as pd
 import yfinance as yf
-from config import TICKERS, CENT_BASED_TICKERS, SYSTEM_LOG_WEBHOOK_URL
-from discord import send_discord_message
+from .config import TICKERS, CENT_BASED_TICKERS, SYSTEM_LOG_WEBHOOK_URL
+from .discord import send_discord_message
 
 def get_usd_jpy_rate(df) -> float:
     """ドル円（JPY=X）の最新為替レートを取得"""
