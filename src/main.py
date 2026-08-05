@@ -2,6 +2,7 @@ import os
 import json
 from datetime import datetime
 import zoneinfo
+import pandas as pd  # ← これを追加！
 import yfinance as yf
 
 # 1. 明示的に日本時間（JST）のタイムゾーンを定義
