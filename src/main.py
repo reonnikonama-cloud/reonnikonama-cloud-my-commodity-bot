@@ -7,14 +7,15 @@ from src.config import (
     JST,
     RANKING_WEBHOOK_URL,
     REPORT_WEBHOOK_URL,
-    SYSTEM_LOG_WEBHOOK_URL,
     STATE_FILE_PATH,
+    SYSTEM_LOG_WEBHOOK_URL,
+    TICKERS,
 )
 from src.discord import send_discord_message
 from src.modules.fetcher import get_commodity_data
 from src.reporters import (
-    generate_am_report,
-    generate_pm_report,
+    generate_am_report_embed,
+    generate_pm_report_embed,
     generate_volatility_time_ranking,
 )
 
@@ -62,26 +63,27 @@ def run_snapshot():
     # 前場サマリー（12:00〜12:15）
     if hour == 12 and minute < 15:
         state["am_prices"] = prices
-        report = generate_am_report(state, usdjpy)
-        send_discord_message(REPORT_WEBHOOK_URL, report)
+        embed = generate_am_report_embed(state, usdjpy)
+        send_discord_message(REPORT_WEBHOOK_URL, embed=embed)
 
         vol_ranking = generate_volatility_time_ranking(state, "前場サマリー")
-        send_discord_message(RANKING_WEBHOOK_URL, vol_ranking)
+        send_discord_message(RANKING_WEBHOOK_URL, message=vol_ranking)
 
     # 後場サマリー（23:50〜23:59）
     elif hour == 23 and minute >= 50:
-        report = generate_pm_report(state, usdjpy)
-        send_discord_message(REPORT_WEBHOOK_URL, report)
+        embed = generate_pm_report_embed(state, usdjpy)
+        send_discord_message(REPORT_WEBHOOK_URL, embed=embed)
 
         vol_ranking = generate_volatility_time_ranking(state, "後場サマリー")
-        send_discord_message(RANKING_WEBHOOK_URL, vol_ranking)
+        send_discord_message(RANKING_WEBHOOK_URL, message=vol_ranking)
 
     save_state(state)
 
     # 15分ごとのスナップショット保存完了ログを送信
     count = len(prices)
-    log_msg = f"✅ `[{date_str} {time_str}]` スナップショット保存完了 (円換算済み / 取得数: {count}/16)"
-    send_discord_message(SYSTEM_LOG_WEBHOOK_URL, log_msg)
+    total_tickers = len(TICKERS)
+    log_msg = f"✅ `[{date_str} {time_str}]` スナップショット保存完了 (円換算済み / 取得数: {count}/{total_tickers})"
+    send_discord_message(SYSTEM_LOG_WEBHOOK_URL, message=log_msg)
 
 
 def run_daily_report():
@@ -96,15 +98,15 @@ def run_daily_report():
             "snapshots": {now_jst.strftime("%H:%M"): prices},
         }
 
-    report = generate_pm_report(state, usdjpy)
-    send_discord_message(REPORT_WEBHOOK_URL, report)
+    embed = generate_pm_report_embed(state, usdjpy)
+    send_discord_message(REPORT_WEBHOOK_URL, embed=embed)
 
 
 def run_ranking():
     """ランキング送信ジョブ"""
     state = load_state()
     vol_ranking = generate_volatility_time_ranking(state, "日次サマリー")
-    send_discord_message(RANKING_WEBHOOK_URL, vol_ranking)
+    send_discord_message(RANKING_WEBHOOK_URL, message=vol_ranking)
 
 
 if __name__ == "__main__":
