@@ -14,7 +14,7 @@ RANKING_WEBHOOK_URL = os.getenv("RANKING_WEBHOOK_URL", "")
 # --------------------------------------------------
 CATEGORY_TICKERS = {
     "✨ 貴金属・産業用金属（Metals）": [
-        "JAU.CMX",  # 東京金先物 (JPX/円)
+        "JAU=F",  # 東京金先物 (JPX/円) ※JAU.CMXから変更
         "GC=F",  # NY金 (COMEX)
         "XAUUSD=X",  # ロンドン金 (LBMA)
         "JAG.CMX",  # 東京銀先物 (JPX/円)
@@ -53,7 +53,7 @@ CENT_BASED_TICKERS = {"KC=F", "SB=F", "ZC=F", "ZW=F", "ZS=F"}
 
 # 日本市場・円建て（ドル円を乗算しない）銘柄
 JPY_BASED_TICKERS = {
-    "JAU.CMX",
+    "JAU=F",
     "JAG.CMX",
     "JPL.CMX",
     "JPA.CMX",
@@ -63,7 +63,7 @@ JPY_BASED_TICKERS = {
 # レポート用表示名マッピング
 TICKER_NAMES = {
     # 貴金属・産業用金属
-    "JAU.CMX": "東京金 (JPX/円)",
+    "JAU=F": "東京金 (JPX/円)",
     "GC=F": "NY金 (COMEX)",
     "XAUUSD=X": "ロンドン金 (LBMA)",
     "JAG.CMX": "東京銀 (JPX/円)",
